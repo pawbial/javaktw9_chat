@@ -15,7 +15,7 @@ public class ChatLog {
     private Map<Socket, ObjectOutputStream> registeredClients;
     private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyy-MM-dd: HH:mm:ss");
 
-    public ChatLog(Map<Socket, ObjectOutputStream> registeredClients) {
+    public ChatLog() {
 
     }
 

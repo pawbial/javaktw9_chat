@@ -15,7 +15,7 @@ public class ClientTerminal implements Runnable {
 
 
     public ClientTerminal() throws IOException {
-        connectionToServer = new Socket("192.168.8.7", 139);
+        connectionToServer = new Socket("192.168.8.7", 5567);
     }
 
 
