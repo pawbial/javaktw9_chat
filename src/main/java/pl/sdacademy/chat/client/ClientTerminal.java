@@ -15,7 +15,7 @@ public class ClientTerminal implements Runnable {
 
 
     public ClientTerminal() throws IOException {
-        connectionToServer = new Socket("192.168.8.7", 5567);
+        connectionToServer = new Socket("192.168.8.4", 5567);
     }
 
 
@@ -42,3 +42,5 @@ public class ClientTerminal implements Runnable {
         System.out.println("Disconnecting");
     }
 }
+
+

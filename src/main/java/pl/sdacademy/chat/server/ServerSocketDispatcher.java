@@ -19,6 +19,7 @@ public class ServerSocketDispatcher {
         try {
             while (true) {
                 Socket client = server.accept();
+                System.out.println("### New client connected ###");
                 ServerSocketReaderRunnable clientTask = new ServerSocketReaderRunnable(client, chatLog);
                 new Thread(clientTask).start();
 
