@@ -6,47 +6,39 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
 public class ClientTerminal implements Runnable {
 
     private final Socket connectionToServer;
 
+
     public ClientTerminal() throws IOException {
-        connectionToServer = new Socket("IP", 5567);
+        connectionToServer = new Socket("192.168.8.7", 139);
     }
 
 
     @Override
     public void run() {
-        try (OutputStream streamToServer = connectionToServer.getOutputStream()) {
-            try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(streamToServer)) {
-                System.out.print("> Your nickname");
-                Scanner userInput = new Scanner(System.in);
-                String author = userInput.nextLine();
-                String message = userInput.nextLine();
-                String exit = "exit";
-                while (!message.equalsIgnoreCase(exit)) {
-                    System.out.print(">");
-                    String userMessage = userInput.nextLine();
-                    ChatMessage chatMessage = new ChatMessage(author, userMessage);
-                    objectOutputStream.writeObject(chatMessage);
-                    objectOutputStream.flush();
-                }
-
-            } catch (IOException e) {
-                System.out.println("message error");
-                e.printStackTrace();
-            }
+        try (ObjectOutputStream streamToServer =
+                     new ObjectOutputStream(
+                             connectionToServer.getOutputStream())){
+            Scanner scanner = new Scanner(System.in);
+            System.out.print("Your username: ");
+            String username = scanner.nextLine();
+            String message;
+            do {
+                System.out.print("> ");
+                message = scanner.nextLine();
+                ChatMessage messageToSend = new ChatMessage(username, message);
+                streamToServer.writeObject(messageToSend);
+                streamToServer.flush();
+            } while (!message.equalsIgnoreCase("exit"));
         } catch (IOException e) {
-            System.out.println("message error");
+            System.out.println("Server closed connection.");
             e.printStackTrace();
         }
-        //wytworzsenie strumieni >> try with rescources
-        //pobierz nick od usera
-        //pętla aż user wpisze exit
-        //w pętli pobiera text do wysłania od użytkownika
-        // wysyłamy go do servera >> wpisujemy do OOS
-        //
+        System.out.println("Disconnecting");
     }
 }

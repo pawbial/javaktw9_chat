@@ -6,11 +6,14 @@ import pl.sdacademy.chat.model.DatedChatMessage;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
+import java.util.Set;
 
 public class ChatLog {
 
     private Map<Socket, ObjectOutputStream> registeredClients;
+    private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyy-MM-dd: HH:mm:ss");
 
     public ChatLog(Map<Socket, ObjectOutputStream> registeredClients) {
 
@@ -30,27 +33,23 @@ public class ChatLog {
     }
 
     public boolean unregister(Socket client) {
-        ObjectOutputStream remove = registeredClients.remove(client);
-        if (remove != null) {
-            System.out.println("### " + client + " was removed from chat");
-            return true;
+        ObjectOutputStream connectionToClient = registeredClients.remove(client);
+        if (connectionToClient != null) {
+            try {
+                connectionToClient.close();
+                System.out.println("### " + client + " was removed from chat");
+                return true;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         return false;
     }
 
     public void acceptMessage(ChatMessage message) {
         DatedChatMessage userMessage = new DatedChatMessage(message);
-        String messageToSend = "<" + userMessage.getRecieveDate() + "> <" + userMessage.getAuthor() + "> <" + userMessage.getMessage() + ">";
-        System.out.println(messageToSend);
-        for (Socket client : registeredClients.keySet())
-            try {
-                ObjectOutputStream objectOutputStream = registeredClients.get(client);
-                objectOutputStream.writeObject(message);
-                objectOutputStream.flush();
-            } catch (IOException e) {
-                registeredClients.remove(client);
-                e.printStackTrace();
-            }
+        String messageToSend = printMessage(userMessage);
+        updateClients(message, messageToSend);
 
 
         //przekonwertować ChatMessage na DatedChattMessage
@@ -58,4 +57,25 @@ public class ChatLog {
         //wysłać DatedChatMessage do wszystkich klientów
         //jeżeli nie udało się wysłać komunikatu do któregoś z klientów to wyrejestruj tego klienta
     }
+
+    private void updateClients(ChatMessage message, String messageToSend) {
+        System.out.println(messageToSend);
+        Set<Map.Entry<Socket, ObjectOutputStream>> allEntries = registeredClients.entrySet();
+
+        for (Map.Entry<Socket, ObjectOutputStream> entry : allEntries) {
+            ObjectOutputStream connectionToClient = entry.getValue();
+            try {
+                connectionToClient.writeObject(messageToSend);
+                connectionToClient.flush();
+            } catch (IOException e) {
+                unregister(entry.getKey()); 
+            }
+        }
+    }
+
+    private String printMessage(DatedChatMessage userMessage) {
+        return "<" + dateFormatter.format(userMessage.getRecieveDate()) + "> <" + userMessage.getAuthor() + "> <" + userMessage.getMessage() + ">";
+    }
+
+
 }
