@@ -19,13 +19,12 @@ public class DatedChatMessageTest {
         String author = testMessage.getAuthor();
         String message = testMessage.getMessage();
         LocalDateTime testDate = testMessage.getRecieveDate();
-        LocalDateTime now = LocalDateTime.now();
-        boolean dateResult = now.equals(testDate);
+
 
     // Then
         Assert.assertEquals("AA",author);
         Assert.assertEquals("BB",message);
-        Assert.assertNotEquals(now,testDate);
+        Assert.assertNotNull(testDate);
 
 
 
