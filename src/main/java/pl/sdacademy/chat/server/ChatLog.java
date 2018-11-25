@@ -48,33 +48,29 @@ public class ChatLog {
 
     public void acceptMessage(ChatMessage message) {
         DatedChatMessage userMessage = new DatedChatMessage(message);
-        String messageToSend = printMessage(userMessage);
-        updateClients(message, messageToSend);
-
-
-        //przekonwertować ChatMessage na DatedChattMessage
-        //wypisać na ekran wiadomość w formacie <Data><autor><message>
-        //wysłać DatedChatMessage do wszystkich klientów
-        //jeżeli nie udało się wysłać komunikatu do któregoś z klientów to wyrejestruj tego klienta
+        printMessage(userMessage);
+        updateClients(userMessage);
     }
 
-    private void updateClients(ChatMessage message, String messageToSend) {
-        System.out.println(messageToSend);
+    private void updateClients(ChatMessage message) {
+
         Set<Map.Entry<Socket, ObjectOutputStream>> allEntries = registeredClients.entrySet();
 
         for (Map.Entry<Socket, ObjectOutputStream> entry : allEntries) {
             ObjectOutputStream connectionToClient = entry.getValue();
             try {
-                connectionToClient.writeObject(messageToSend);
+                connectionToClient.writeObject(message);
                 connectionToClient.flush();
             } catch (IOException e) {
-                unregister(entry.getKey()); 
+                unregister(entry.getKey());
             }
         }
     }
 
-    private String printMessage(DatedChatMessage userMessage) {
-        return "<" + dateFormatter.format(userMessage.getRecieveDate()) + "> <" + userMessage.getAuthor() + "> <" + userMessage.getMessage() + ">";
+    private void printMessage(DatedChatMessage userMessage) {
+        System.out.println("<" + dateFormatter.format(userMessage.getRecieveDate())
+                + "> <" + userMessage.getAuthor()
+                + "> <" + userMessage.getMessage() + ">"); ;
     }
 
 
